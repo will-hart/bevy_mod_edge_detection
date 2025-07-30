@@ -11,6 +11,7 @@ fn main() {
         .add_plugins((DefaultPlugins, EdgeDetectionPlugin))
         .init_resource::<EdgeDetectionConfig>()
         .add_systems(Startup, setup)
+        .add_systems(Update, rotate_entities)
         .run();
 }
 
@@ -54,10 +55,26 @@ fn setup(
     ));
     // light
     commands.spawn((
-        PointLight {
-            shadows_enabled: true,
-            ..default()
-        },
-        Transform::from_xyz(4.0, 8.0, 4.0),
+        Transform::default(),
+        Rotate(1.5),
+        children![(
+            PointLight {
+                shadows_enabled: false,
+                intensity: 11_000_000.0,
+                ..default()
+            },
+            Transform::from_xyz(4.0, 8.0, 4.0),
+        )],
     ));
+}
+
+#[derive(Component, Default)]
+struct Rotate(f32);
+
+fn rotate_entities(time: Res<Time>, mut items: Query<(&mut Transform, &Rotate)>) {
+    for (mut tx, rotate) in &mut items {
+        let speed = rotate.0;
+        // let delta = Quat::from_axis_angle(Vec3::Z, speed * time.delta_secs());
+        tx.rotate_y(speed * time.delta_secs());
+    }
 }
