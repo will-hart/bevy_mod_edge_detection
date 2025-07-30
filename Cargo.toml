@@ -7,4 +7,6 @@ description = "A simple plugin to add an edge detection shader to bevy"
 repository = "https://github.com/IceSentry/bevy_mod_edge_detection"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy" }
+bevy = { git = "https://github.com/bevyengine/bevy", features = [
+  "gltf_convert_coordinates_default"
+] }

@@ -1,6 +1,7 @@
 use bevy::{
     anti_aliasing::fxaa::{Fxaa, Sensitivity},
     core_pipeline::prepass::{DepthPrepass, NormalPrepass},
+    pbr::DirectionalLightShadowMap,
     prelude::*,
 };
 use bevy_mod_edge_detection::{EdgeDetectionCamera, EdgeDetectionConfig, EdgeDetectionPlugin};
@@ -9,6 +10,7 @@ fn main() {
     App::new()
         // MSAA currently doesn't work correctly with the plugin
         .add_plugins((DefaultPlugins, EdgeDetectionPlugin))
+        .insert_resource(DirectionalLightShadowMap { size: 4096 })
         .init_resource::<EdgeDetectionConfig>()
         .add_systems(Startup, setup)
         .add_systems(Update, rotate_entities)
@@ -18,6 +20,7 @@ fn main() {
 /// set up a simple 3D scene
 fn setup(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
@@ -47,13 +50,11 @@ fn setup(
         MeshMaterial3d(materials.add(Color::WHITE)),
         Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
     ));
-    // cube
+
     commands.spawn((
-        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
-        MeshMaterial3d(materials.add(Color::srgb(0.487, 0.564, 1.0))),
-        Transform::from_xyz(0.0, 0.5, 0.0),
+        SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("castle.glb"))),
+        Transform::from_rotation(Quat::from_axis_angle(Vec3::Y, 1.4)).with_scale(Vec3::splat(0.5)),
     ));
-    // light
     commands.spawn((
         Transform::default(),
         Visibility::Visible,
@@ -61,6 +62,7 @@ fn setup(
         children![(
             PointLight {
                 shadows_enabled: true,
+                intensity: 20_000_000.0,
                 ..default()
             },
             Transform::from_xyz(4.0, 8.0, 4.0),
