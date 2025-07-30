@@ -56,6 +56,7 @@ fn setup(
     // light
     commands.spawn((
         Transform::default(),
+        Visibility::Visible,
         Rotate(1.5),
         children![(
             PointLight {
